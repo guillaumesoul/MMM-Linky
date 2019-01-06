@@ -12,7 +12,7 @@ module.exports = NodeHelper.create({
 		let self = this;
 		let data = {};
 		let index = 0;
-		for (dataType of refConfig.dataType) {
+		for (dataType of refConfig.dataTypes) {
 			var linkyData = await self.requestData(dataType);
 			data[''+dataType] = linkyData;
 		}
@@ -56,7 +56,9 @@ module.exports = NodeHelper.create({
 				break;
 		}
 
-		return await dataPromised;
+		var returnData = await dataPromised;
+
+		return returnData;
 	},
 
 
