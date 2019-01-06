@@ -8,6 +8,7 @@ Module.register("MMM-Linky",{
         animationSpeed: 1000,
         result: {},
         jsonData: {},
+        dataType: ['daily','monthly','currentMonthEstimation']
     },
 
     start: function() {
@@ -43,12 +44,6 @@ Module.register("MMM-Linky",{
     // Override dom generator.
     getDom: function() {
 
-        console.log('getDom');
-
-        //var canvas = '<canvas id="myChart" width="400" height="400"></canvas>';
-
-
-
         var wrapper = document.createElement("div");
         var data = this.result;
         if (!this.loaded) {
@@ -57,15 +52,7 @@ Module.register("MMM-Linky",{
             return wrapper;
         }
 
-        //wrapper.appendChild(canvas);
-
-        console.log(this.config.jsonData);
-        var test = this.config.jsonData[0].date;
-        console.log(test);
-        var momentdate = moment(test);
-        console.log(momentdate);
-
-        let consoLabel = this.config.jsonData.map(a => a.date);
+        let consoLabel = this.config.jsonData.map(a => moment(a.date).format('DD/MM'));
         let consoData = this.config.jsonData.map(a => a.value);
         let BackgroundColors = [];
         for(var i = 0 ; i<consoData.length; i++) {
@@ -75,8 +62,6 @@ Module.register("MMM-Linky",{
 
         var ctx = document.getElementById("dailyChart");
 
-        console.log(ctx);
-
         var myChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -85,15 +70,6 @@ Module.register("MMM-Linky",{
                     label: '# of Votes',
                     data: consoData,
                     backgroundColor: BackgroundColors,
-                    /*borderColor: [
-                        'rgba(255,99,132,1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1*/
                 }]
             },
             options: {
