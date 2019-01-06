@@ -7,29 +7,26 @@ module.exports = NodeHelper.create({
 	start: function() {
 	},
 	
-	reload: function(refConfig) {
-
-		let self = this;
-
-		console.log('reload');
-		// Log in
-		const sessionPromised = linky.login('hoarau.soullard@gmail.com', 'To@Mo@23E');
-		sessionPromised.then(function(session) {
-			let dataPromised = session.getDailyData(session, {});
-			dataPromised.then(function(data) {
-				console.log(data);
-				//var JSONParsed = JSON.parse(self.httpsRequestData);
-				self.sendSocketNotification("RELOAD_DONE",data);
-			});
-		});
-		
+	reload: async function(refConfig) {
+		let dailyData = await this.requestDailyData();
+		this.sendSocketNotification("RELOAD_DONE",dailyData);
 	},
 
 	socketNotificationReceived: function(notification, payload) {
-		console.log('socketNotificationReceived');
 		if (notification === 'RELOAD') {
 	      this.reload(payload);
 	    }
+	},
+
+	getLinkySessionPromised() {
+		return linky.login('hoarau.soullard@gmail.com', 'To@Mo@23E');
+	},
+
+	async requestDailyData() {
+		let sessionPromised = this.getLinkySessionPromised();
+		let session = await sessionPromised;
+		let dataPromised = session.getDailyData(session, {});
+		return await dataPromised;
 	}
 });
 
