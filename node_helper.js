@@ -1,15 +1,23 @@
 var NodeHelper = require("node_helper");
 const https = require('https');
-
 const linky = require('@bokub/linky');
+const moment = require('moment');
 
 module.exports = NodeHelper.create({
 	start: function() {
 	},
 	
 	reload: async function(refConfig) {
-		let dailyData = await this.requestDailyData();
-		this.sendSocketNotification("RELOAD_DONE",dailyData);
+
+		let self = this;
+		let data = {};
+		let index = 0;
+		for (dataType of refConfig.dataType) {
+			var linkyData = await self.requestData(dataType);
+			data[''+dataType] = linkyData;
+		}
+
+		this.sendSocketNotification("RELOAD_DONE",data);
 	},
 
 	socketNotificationReceived: function(notification, payload) {
@@ -22,10 +30,32 @@ module.exports = NodeHelper.create({
 		return linky.login('hoarau.soullard@gmail.com', 'To@Mo@23E');
 	},
 
-	async requestDailyData() {
+	async requestData(dataType) {
 		let sessionPromised = this.getLinkySessionPromised();
 		let session = await sessionPromised;
-		let dataPromised = session.getDailyData(session, {});
+
+		switch(dataType) {
+			case 'hourly':
+				var dataPromised = session.getHourlyData(session, {});
+				break;
+			case 'daily':
+				var dataPromised = session.getDailyData(session, {});
+				break;
+			case 'monthly':
+				var dataPromised = session.getMonthlyData(session, {});
+				break;
+			case 'yearly':
+				var dataPromised = session.getYearlyData(session, {});
+				break;
+			case 'currentMonthEstimation':
+				var firstDayOfCurrentMonth = moment().startOf('month').format('DD/MM/YYYY');
+				var dataPromised = session.getDailyData(session, {
+					start: firstDayOfCurrentMonth
+				});
+				break;
+
+		}
+
 		return await dataPromised;
 	}
 });

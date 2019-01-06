@@ -8,7 +8,7 @@ Module.register("MMM-Linky",{
         animationSpeed: 1000,
         result: {},
         jsonData: {},
-        dataType: ['daily','monthly','currentMonthEstimation']
+        dataType: ['daily', 'hourly', 'estimationCurrentMonth']
     },
 
     start: function() {
@@ -52,7 +52,7 @@ Module.register("MMM-Linky",{
             return wrapper;
         }
 
-        let consoLabel = this.config.jsonData.map(a => moment(a.date).format('DD/MM'));
+        /*let consoLabel = this.config.jsonData.map(a => moment(a.date).format('DD/MM'));
         let consoData = this.config.jsonData.map(a => a.value);
         let BackgroundColors = [];
         for(var i = 0 ; i<consoData.length; i++) {
@@ -82,7 +82,7 @@ Module.register("MMM-Linky",{
                     }]
                 }
             }
-        });
+        });*/
 
 
         return wrapper;
@@ -93,6 +93,7 @@ Module.register("MMM-Linky",{
         this.sendSocketNotification('RELOAD',this.config);
     },
     socketNotificationReceived: function(notification, payload) {
+        console.log(notification, payload);
         this.config.jsonData = payload;
         if (notification === "RELOAD_DONE") {
             this.loaded = true;
