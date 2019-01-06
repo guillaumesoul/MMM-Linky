@@ -31,33 +31,36 @@ module.exports = NodeHelper.create({
 	},
 
 	async requestData(dataType) {
+
 		let sessionPromised = this.getLinkySessionPromised();
 		let session = await sessionPromised;
 
 		switch(dataType) {
 			case 'hourly':
-				var dataPromised = session.getHourlyData(session, {});
+				var dataPromised = session.getHourlyData();
 				break;
 			case 'daily':
-				var dataPromised = session.getDailyData(session, {});
+				var dataPromised = session.getDailyData();
 				break;
 			case 'monthly':
-				var dataPromised = session.getMonthlyData(session, {});
+				var dataPromised = session.getMonthlyData();
 				break;
 			case 'yearly':
-				var dataPromised = session.getYearlyData(session, {});
+				var dataPromised = session.getYearlyData();
 				break;
 			case 'currentMonthEstimation':
 				var firstDayOfCurrentMonth = moment().startOf('month').format('DD/MM/YYYY');
-				var dataPromised = session.getDailyData(session, {
+				var dataPromised = session.getDailyData({
 					start: firstDayOfCurrentMonth
 				});
 				break;
-
 		}
 
 		return await dataPromised;
-	}
+	},
+
+
+
 });
 
 

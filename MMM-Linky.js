@@ -6,9 +6,11 @@ Module.register("MMM-Linky",{
         updateInterval: 900000,
         initialLoadDelay: 0,
         animationSpeed: 1000,
-        result: {},
+        //result: {},
         jsonData: {},
-        dataType: ['daily', 'hourly', 'estimationCurrentMonth']
+        dataType: ['daily', 'hourly', 'estimationCurrentMonth'],
+        kWhPrice: 0.1467,
+        abonnementPrice: 14.77
     },
 
     start: function() {
@@ -45,7 +47,7 @@ Module.register("MMM-Linky",{
     getDom: function() {
 
         var wrapper = document.createElement("div");
-        var data = this.result;
+        //var data = this.result;
         if (!this.loaded) {
             wrapper.innerHTML = "Loading...";
             wrapper.className = "dimmed light small";
@@ -93,12 +95,49 @@ Module.register("MMM-Linky",{
         this.sendSocketNotification('RELOAD',this.config);
     },
     socketNotificationReceived: function(notification, payload) {
-        console.log(notification, payload);
-        this.config.jsonData = payload;
+
+        if(payload.hourly != undefined) {
+            this.config.jsonData.hourly = this.formatHourlyData(payload.hourly);
+        }
+
+        if(payload.daily != undefined) {
+            this.config.jsonData.daily = payload.daily;
+        }
+
+        if(payload.currentMonthEstimation != undefined) {
+            this.config.jsonData.currentMonthEstimation = this.getCurrentMonthEstimationprice(payload.currentMonthEstimation);
+        }
+
+        console.log(this.config.jsonData);
+
+
+        //this.config.jsonData = payload;
         if (notification === "RELOAD_DONE") {
             this.loaded = true;
             this.updateDom(this.animationSpeed);
         }
+    },
+
+    formatHourlyData(rawData) {
+        let dataFormatted = [];
+        for(var i=0; i<rawData.length; i++ ) {
+            if(dataFormatted[Math.trunc(i/2)] == undefined) {
+                dataFormatted[Math.trunc(i/2)] = 0;
+            }
+            dataFormatted[Math.trunc(i/2)] += parseFloat(rawData[i].value);
+            if(i%2 == 1) {
+                dataFormatted[Math.trunc(i/2)] = parseFloat(dataFormatted[Math.trunc(i/2)].toFixed(2));
+            }
+        }
+        return dataFormatted;
+    },
+
+    getCurrentMonthEstimationprice(rawData) {
+        let currentMonthEstimationprice = this.config.abonnementPrice;
+        for(var i=0; i<rawData.length; i++ ) {
+            currentMonthEstimationprice += parseFloat(rawData[i].value)*this.config.kWhPrice;
+        }
+        return Math.round(currentMonthEstimationprice);
     }
 
 });
