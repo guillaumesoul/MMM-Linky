@@ -6,7 +6,6 @@ Module.register("MMM-Linky",{
         updateInterval: 900000,
         initialLoadDelay: 0,
         animationSpeed: 1000,
-        //result: {},
         jsonData: {},
         dataType: ['daily', 'hourly', 'estimationCurrentMonth'],
         kWhPrice: 0.1467,
@@ -19,8 +18,12 @@ Module.register("MMM-Linky",{
         canvas.setAttribute("id", "dailyChart");
         canvas.setAttribute("style", "width: 400px; height: 400px; ");
 
-        let chartContainer = document.getElementById("chartContainer");
-        chartContainer.appendChild(canvas);
+        //let chartContainer = document.getElementById("chartContainer");
+        //let chartContainer = document.getElementsByClassName('MMM-Linky')
+        //let chartContainer = document.querySelectorAll('.MMM-Linky .module-content');
+        let chartContainer = document.querySelectorAll('.top.left .container');
+        console.log(chartContainer);
+        //chartContainer.appendChild(canvas);
 
         Log.log('LOG' + this.name + ' is started!');
         // Set locale.
@@ -54,39 +57,9 @@ Module.register("MMM-Linky",{
             return wrapper;
         }
 
-        /*let consoLabel = this.config.jsonData.map(a => moment(a.date).format('DD/MM'));
-        let consoData = this.config.jsonData.map(a => a.value);
-        let BackgroundColors = [];
-        for(var i = 0 ; i<consoData.length; i++) {
-            BackgroundColors.push('rgba(255, 255, 255, 0.7)')
+        if(this.config.jsonData.daily != undefined) {
+            //this.drawChartDaily();
         }
-
-
-        var ctx = document.getElementById("dailyChart");
-
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: consoLabel,
-                datasets: [{
-                    label: '# of Votes',
-                    data: consoData,
-                    backgroundColor: BackgroundColors,
-                }]
-            },
-            options: {
-                //responsive: false,
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true
-                        }
-                    }]
-                }
-            }
-        });*/
-
-
         return wrapper;
 
     },
@@ -108,10 +81,6 @@ Module.register("MMM-Linky",{
             this.config.jsonData.currentMonthEstimation = this.getCurrentMonthEstimationprice(payload.currentMonthEstimation);
         }
 
-        console.log(this.config.jsonData);
-
-
-        //this.config.jsonData = payload;
         if (notification === "RELOAD_DONE") {
             this.loaded = true;
             this.updateDom(this.animationSpeed);
@@ -138,6 +107,40 @@ Module.register("MMM-Linky",{
             currentMonthEstimationprice += parseFloat(rawData[i].value)*this.config.kWhPrice;
         }
         return Math.round(currentMonthEstimationprice);
+    },
+
+    drawChartDaily() {
+        let dailyData = this.config.jsonData.daily;
+        let consoLabel = dailyData.map(a => moment(a.date).format('DD/MM'));
+        let consoData = dailyData.map(a => a.value);
+        let BackgroundColors = [];
+        for(var i = 0 ; i<consoData.length; i++) {
+            BackgroundColors.push('rgba(255, 255, 255, 0.7)')
+        }
+
+        var ctx = document.getElementById("dailyChart");
+
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: consoLabel,
+                datasets: [{
+                    label: '# of Votes',
+                    data: consoData,
+                    backgroundColor: BackgroundColors,
+                }]
+            },
+            options: {
+                //responsive: false,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero:true
+                        }
+                    }]
+                }
+            }
+        });
     }
 
 });
