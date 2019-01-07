@@ -9,15 +9,19 @@ module.exports = NodeHelper.create({
 	
 	reload: async function(refConfig) {
 
-		let self = this;
-		let data = {};
-		let index = 0;
-		for (dataType of refConfig.dataTypes) {
-			var linkyData = await self.requestData(dataType);
-			data[''+dataType] = linkyData;
-		}
+		try {
+			let self = this;
+			let data = {};
+			let index = 0;
+			for (dataType of refConfig.dataTypes) {
+				var linkyData = await self.requestData(dataType);
+				data[''+dataType] = linkyData;
+			}
 
-		this.sendSocketNotification("RELOAD_DONE",data);
+			this.sendSocketNotification("RELOAD_DONE",data);
+		} catch(err) {
+			err
+		}
 	},
 
 	socketNotificationReceived: function(notification, payload) {
@@ -32,33 +36,39 @@ module.exports = NodeHelper.create({
 
 	async requestData(dataType) {
 
-		let sessionPromised = this.getLinkySessionPromised();
-		let session = await sessionPromised;
+		try {
+			let sessionPromised = this.getLinkySessionPromised();
+			let session = await sessionPromised;
 
-		switch(dataType) {
-			case 'hourly':
-				var dataPromised = session.getHourlyData();
-				break;
-			case 'daily':
-				var dataPromised = session.getDailyData();
-				break;
-			case 'monthly':
-				var dataPromised = session.getMonthlyData();
-				break;
-			case 'yearly':
-				var dataPromised = session.getYearlyData();
-				break;
-			case 'currentMonthEstimation':
-				var firstDayOfCurrentMonth = moment().startOf('month').format('DD/MM/YYYY');
-				var dataPromised = session.getDailyData({
-					start: firstDayOfCurrentMonth
-				});
-				break;
+			switch(dataType) {
+				case 'hourly':
+					var dataPromised = session.getHourlyData();
+					break;
+				case 'daily':
+					var dataPromised = session.getDailyData();
+					break;
+				case 'monthly':
+					var dataPromised = session.getMonthlyData();
+					break;
+				case 'yearly':
+					var dataPromised = session.getYearlyData();
+					break;
+				case 'currentMonthEstimation':
+					var firstDayOfCurrentMonth = moment().startOf('month').format('DD/MM/YYYY');
+					var dataPromised = session.getDailyData({
+						start: firstDayOfCurrentMonth
+					});
+					break;
+			}
+
+			var returnData = await dataPromised;
+			return returnData;
+
+		} catch(err) {
+			console.log(err);
 		}
 
-		var returnData = await dataPromised;
 
-		return returnData;
 	},
 
 

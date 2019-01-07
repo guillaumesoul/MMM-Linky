@@ -7,9 +7,6 @@ Module.register("MMM-Linky",{
         initialLoadDelay: 0,
         animationSpeed: 1000,
         jsonData: {},
-        /*dataType: ['daily', 'hourly', 'estimationCurrentMonth'],
-        kWhPrice: 0.1467,
-        abonnementPrice: 14.77*/
     },
 
     start: function() {
@@ -61,7 +58,6 @@ Module.register("MMM-Linky",{
     socketNotificationReceived: function(notification, payload) {
 
         if(payload.hourly != undefined) {
-            console.log(payload.hourly);
             this.config.jsonData.hourly = this.formatHourlyData(payload.hourly);
             this.drawChartHourly();
         }
@@ -72,7 +68,9 @@ Module.register("MMM-Linky",{
         }
 
         if(payload.currentMonthEstimation != undefined) {
+            console.log(payload);
             this.config.jsonData.currentMonthEstimation = this.getCurrentMonthEstimationprice(payload.currentMonthEstimation);
+            this.displayCurrentMonthEstimation();
         }
 
         if (notification === "RELOAD_DONE") {
@@ -98,7 +96,9 @@ Module.register("MMM-Linky",{
     getCurrentMonthEstimationprice(rawData) {
         let currentMonthEstimationprice = this.data.config.abonnementPrice;
         for(var i=0; i<rawData.length; i++ ) {
-            currentMonthEstimationprice += parseFloat(rawData[i].value)*this.data.config.kWhPrice;
+            if(!isNaN(parseFloat(rawData[i].value))) {
+                currentMonthEstimationprice += parseFloat(rawData[i].value)*this.data.config.kWhPrice;
+            }
         }
         return Math.round(currentMonthEstimationprice);
     },
@@ -139,7 +139,6 @@ Module.register("MMM-Linky",{
 
     drawChartHourly() {
         let dailyData = this.config.jsonData.hourly;
-        console.log(dailyData);
         var consoLabel = []
         for(var i = 0 ; i< 24 ; i++) {
             consoLabel.push(i);
@@ -150,7 +149,6 @@ Module.register("MMM-Linky",{
         }
 
         var ctx = document.getElementById("hourly");
-        console.log(ctx);
 
         var myChart = new Chart(ctx, {
             type: 'bar',
@@ -175,6 +173,13 @@ Module.register("MMM-Linky",{
         });
     },
 
+    displayCurrentMonthEstimation() {
+        var container = document.getElementById('currentMonthEstimation');
+        var title = document.createElement('h2');
+        title.innerHTML = 'Estimation : ' + this.config.jsonData.currentMonthEstimation +' €';
+        container.appendChild(title);
+    },
+
     /*
     * Create canvas tag for all datatype set in config.dataTypes
     */
@@ -186,7 +191,7 @@ Module.register("MMM-Linky",{
                 domElement.setAttribute("id", dataType);
             } else {
                 var domElement = document.createElement('div');
-                domElement.setAttribute('id','currentEstimation');
+                domElement.setAttribute('id','currentMonthEstimation');
             }
             // select the container from the region defined in config (eg '.top.right .container')
             var selectorContainer = '.'+self.data.position.split('_').join('.')+' .container';
